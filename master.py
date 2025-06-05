@@ -2,7 +2,7 @@ import socket
 import yaml
 import sys
 
-KB = 1024
+KiB = 1024
 
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -20,7 +20,7 @@ if '-v' in sys.argv:
     print("\nVERBOSE OUTPUT ENABLED \n")
 
 
-def invokeCMD(socketObject, command, isVerbose=0, bufferSize=KB):
+def invokeCMD(socketObject, command, isVerbose = 0, bufferSize = KiB):
     socketObject.sendall(command.encode())
     response = socketObject.recv(bufferSize) 
     if isVerbose:
@@ -34,7 +34,7 @@ if isVerbose:
     print("Connected:", sock)
     print(" ")
 
-greeting = sock.recv(4096)
+greeting = sock.recv(KiB*5)
 if isVerbose:
     print("> ", greeting.decode())
 
@@ -47,7 +47,7 @@ cmd = f"PASS {ftp_pass}\r\n"
 invokeCMD(sock,cmd, 1)
 
 cmd = f"PASV \r\n"
-response = invokeCMD(sock,cmd)
+response = invokeCMD(sock,cmd, isVerbose)
 
 start = response.index('(')
 end = response.index(')')
@@ -62,13 +62,29 @@ if isVerbose:
 
 pasv_ip = f"{portInfo[0]}.{portInfo[1]}.{portInfo[2]}.{portInfo[3]}" 
 pasv_port =  int(portInfo[4]) * 256  + int(portInfo[5])
+pasv_ftp_server = (pasv_ip, pasv_port)
 
 print(f">  IP: {pasv_ip}:{pasv_port}")
 
+pasv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+pasv_sock.connect(pasv_ftp_server)
+if isVerbose:
+    print("Connected to data socket:", pasv_sock)
+    print(" ")
 
-# print(response)
+cmd = f"LIST \r\n"
+response = invokeCMD(sock,cmd, isVerbose)
 
+listing = b""
+while True:
+    chunk = pasv_sock.recv(4096)
+    if not chunk:
+        break
+    listing += chunk
+
+print(listing.decode())
+
+pasv_sock.close()
+sock.recv(KiB * 100)
 
 sock.close()
-
-
