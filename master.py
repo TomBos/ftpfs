@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+from SocketManager import SocketManager as SM
+
 import socket
 import yaml
 import sys
@@ -27,27 +31,27 @@ def invokeCMD(socketObject, command, isVerbose = 0, bufferSize = KiB):
         print("> ", response.decode().strip('\n'))
     return response.decode().strip('\n')
 
+controllSocket = SM()
+controllSocket.createSocket()
+controllSocket.connectToHost(ftp_host)
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(ftp_server)
 if isVerbose:
-    print("Connected:", sock)
-    print(" ")
+    print(f"Connected: {controllSocket.socket} \n")
 
-greeting = sock.recv(KiB*5)
+greeting = controllSocket.acceptIncomingMessage(KiB * 5)
 if isVerbose:
-    print("> ", greeting.decode())
+    print(f">  {greeting}")
 
 # b => send byte encoded
 # CLRF (\r\n) => Carriage Return + Line Feed => end ftp command
 cmd = f"USER {ftp_user}\r\n"
-invokeCMD(sock,cmd,isVerbose)
+invokeCMD(controllSocket,cmd,isVerbose)
 
 cmd = f"PASS {ftp_pass}\r\n"
-invokeCMD(sock,cmd, 1)
+invokeCMD(controllSocket,cmd, 1)
 
 cmd = f"PASV \r\n"
-response = invokeCMD(sock,cmd, isVerbose)
+response = invokeCMD(controllSocket,cmd, isVerbose)
 
 start = response.index('(')
 end = response.index(')')
@@ -73,7 +77,7 @@ if isVerbose:
     print(" ")
 
 cmd = f"LIST \r\n"
-response = invokeCMD(sock,cmd, isVerbose)
+response = invokeCMD(controllSocket,cmd, isVerbose)
 
 listing = b""
 while True:
@@ -85,6 +89,6 @@ while True:
 print(listing.decode())
 
 pasv_sock.close()
-sock.recv(KiB * 100)
+controllSocket.recv(KiB * 100)
 
-sock.close()
+controllSocket.close()
