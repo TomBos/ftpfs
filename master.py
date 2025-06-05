@@ -38,17 +38,16 @@ controllSocket.connectToHost(ftp_host)
 if isVerbose:
     print(f"Connected: {controllSocket.socket} \n")
 
-greeting = controllSocket.acceptIncomingMessage(KiB * 5)
+response = controllSocket.acceptIncomingMessage(KiB * 5)
 if isVerbose:
-    print(f">  {greeting}")
+    print(f">  {response}")
 
-# b => send byte encoded
-# CLRF (\r\n) => Carriage Return + Line Feed => end ftp command
-cmd = f"USER {ftp_user}\r\n"
-invokeCMD(controllSocket,cmd,isVerbose)
+response = controllSocket.runCommand(f"USER {ftp_user}", KiB*5)
+if isVerbose:
+    print(f">  {response}")
 
-cmd = f"PASS {ftp_pass}\r\n"
-invokeCMD(controllSocket,cmd, 1)
+response = controllSocket.runCommand(f"PASS {ftp_pass}", KiB*5)
+print(f">  {response}")
 
 cmd = f"PASV \r\n"
 response = invokeCMD(controllSocket,cmd, isVerbose)

@@ -21,5 +21,15 @@ class SocketManager:
     def acceptIncomingMessage(self, bufferSize = 1024):
         self.checkIfSocketExists()
         response = self.socket.recv(bufferSize)
-        return response.decode()
+        return response.decode().strip("\n")
+
+    def runCommand(self, command, bufferSize = 1024):
+        command = (command + "\r\n").encode()
+        self.socket.sendall(command)
+        return self.acceptIncomingMessage(bufferSize)
+
+
+
+
+
 
