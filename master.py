@@ -24,8 +24,8 @@ def invokeCMD(socketObject, command, isVerbose=0, bufferSize=KB):
     socketObject.sendall(command.encode())
     response = socketObject.recv(bufferSize) 
     if isVerbose:
-        print("Server says: ", response.decode())
-
+        print("> ", response.decode().strip('\n'))
+    return response.decode().strip('\n')
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,7 +36,7 @@ if isVerbose:
 
 greeting = sock.recv(4096)
 if isVerbose:
-    print("Server says:", greeting.decode())
+    print("> ", greeting.decode())
 
 # b => send byte encoded
 # CLRF (\r\n) => Carriage Return + Line Feed => end ftp command
@@ -44,13 +44,30 @@ cmd = f"USER {ftp_user}\r\n"
 invokeCMD(sock,cmd,isVerbose)
 
 cmd = f"PASS {ftp_pass}\r\n"
-invokeCMD(sock,cmd,isVerbose)
+invokeCMD(sock,cmd, 1)
 
-cmd = f"PWD \r\n"
-invokeCMD(sock,cmd,isVerbose)
+cmd = f"PASV \r\n"
+response = invokeCMD(sock,cmd)
 
-cmd = f"LS \r\n"
-invokeCMD(sock,cmd,isVerbose)
+start = response.index('(')
+end = response.index(')')
+
+if isVerbose:
+    print(f"Server PASV info found at: {start} - {end}")
+
+portInfo = response[start+1:end].split(',')
+
+if isVerbose:
+    print(portInfo)
+
+pasv_ip = f"{portInfo[0]}.{portInfo[1]}.{portInfo[2]}.{portInfo[3]}" 
+pasv_port =  int(portInfo[4]) * 256  + int(portInfo[5])
+
+print(f">  IP: {pasv_ip}:{pasv_port}")
+
+
+# print(response)
+
 
 sock.close()
 
