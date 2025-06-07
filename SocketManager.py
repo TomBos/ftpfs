@@ -25,7 +25,7 @@ class SocketManager:
         response = self.socket.recv(bufferSize)
         return response.decode().strip("\n")
 
-    def runCommand(self, command, bufferSize = 1024):
+    def runControlCommand(self, command, bufferSize = 1024):
         self.checkIfSocketExists()
         command = (command + "\r\n").encode()
         self.socket.sendall(command)
@@ -37,7 +37,7 @@ class SocketManager:
 
     def getNewPassivePort(self, LogsClass, commandBufferSize = 1024):
         self.checkIfSocketExists()
-        response = self.runCommand(f"PASV", commandBufferSize)
+        response = self.runControlCommand(f"PASV", commandBufferSize)
         LogsClass.log(response)
 
         passiveHostStart = response.index('(')+1
@@ -50,9 +50,26 @@ class SocketManager:
 
         passiveHostIP = ".".join(parts[:4])
         passiveHostPort = int(parts[4]) * 256 + int(parts[5])
-        LogsClass.log(f"passive connection IP: {passiveHostIP}:{passiveHostPort}", 1)
+        LogsClass.log(f"passive connection IP: {passiveHostIP}:{passiveHostPort}")
 
-        return {"IP": passiveHostIP, "PORT": passiveHostPort}
+        return [passiveHostIP, passiveHostPort]
+    
+    def runPassiveCommand(self, passiveCommand, LogsClass, commandBufferSize):
+        self.checkIfSocketExists()
+        passiveHostIP, passiveHostPort = self.getNewPassivePort(LogsClass, commandBufferSize)
+        newPassiveSocket = SocketManager()
+        newPassiveSocket.createSocket()
+        newPassiveSocket.connectToHost(passiveHostIP,passiveHostPort)
+        LogsClass.log(f"Connected to passive socket: {newPassiveSocket.socket}")
 
+        commandResponse = self.runControlCommand(passiveCommand, commandBufferSize)
+        LogsClass.log(commandResponse)
 
+        passiveResponse = newPassiveSocket.acceptIncomingMessage(commandBufferSize)
+        
+        controlResponse = self.acceptIncomingMessage(commandBufferSize)
+        LogsClass.log(controlResponse)
+
+        newPassiveSocket.terminateSocket()
+        return passiveResponse
 

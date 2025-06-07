@@ -39,36 +39,18 @@ logs.log(response)
 
 
 # === Authenticate using credentials ===
-response = controlSocket.runCommand(f"USER {username}", KiB*5)
+response = controlSocket.runControlCommand(f"USER {username}", KiB*5)
 logs.log(response)
 
-response = controlSocket.runCommand(f"PASS {password}", KiB*5)
+response = controlSocket.runControlCommand(f"PASS {password}", KiB*5)
 logs.log(response, 1)
 
 # === Create passive socket ===
-passiveHostInfo = controlSocket.getNewPassivePort(logs, KiB*5)
-passiveHostIP = passiveHostInfo["IP"]
-passiveHostPort = passiveHostInfo["PORT"]
+response = controlSocket.runPassiveCommand("LIST", logs, KiB*5)
+logs.log(response, 1)
 
-passiveSocket = SM()
-passiveSocket.createSocket()
-passiveSocket.connectToHost(passiveHostIP,passiveHostPort)
-logs.log(f"Connected to passive socket: {passiveSocket.socket}")
+response = controlSocket.runPassiveCommand("LIST", logs, KiB*5)
+logs.log(response, 1)
 
 # === List all files in FTP configuret root dir
-response = controlSocket.runCommand("LIST", KiB*5)
-logs.log(response)
-
-response = passiveSocket.acceptIncomingMessage(KiB*5)
-logs.log(response, 1)
-response = controlSocket.acceptIncomingMessage(KiB*5)
-logs.log(response,1)
-
-response = controlSocket.runCommand(f"STOR htdocs/stores.php", KiB * 10)
-logs.log(response,2)
-
-
-
-# === Terminate Sockets === 
-passiveSocket.terminateSocket()
 controlSocket.terminateSocket()
