@@ -27,22 +27,26 @@ else:
 
 
 logs = LM(verbosityLevel)
-
 controllSocket = SM()
 controllSocket.createSocket()
 controllSocket.connectToHost(ftp_host)
 
 logs.log(f"Connected: {controllSocket.socket}")
 
+# === Initial Handshake ===
 response = controllSocket.acceptIncomingMessage(KiB * 5)
 logs.log(response)
 
+
+# === Authenticate using credentials ===
 response = controllSocket.runCommand(f"USER {ftp_user}", KiB*5)
 logs.log(response)
 
 response = controllSocket.runCommand(f"PASS {ftp_pass}", KiB*5)
 logs.log(response, 1)
 
+
+# === Get info on where to open passive mode socket ===
 response = controllSocket.runCommand(f"PASV", KiB*5)
 logs.log(response)
 
@@ -56,21 +60,23 @@ logs.log(portInfo)
 
 pasv_ip = f"{portInfo[0]}.{portInfo[1]}.{portInfo[2]}.{portInfo[3]}" 
 pasv_port =  int(portInfo[4]) * 256  + int(portInfo[5])
-
 logs.log(f"passive connection IP: {pasv_ip}:{pasv_port}", 1)
 
 
+# === Create passive socket ===
 passiveSocket = SM()
 passiveSocket.createSocket()
 passiveSocket.connectToHost(pasv_ip,pasv_port)
 logs.log(f"Connected to passive socket: {passiveSocket.socket}")
 
+# === List all files in FTP configuret root dir
 response = controllSocket.runCommand("LIST", KiB*5)
 logs.log(response)
-
 
 response = passiveSocket.acceptIncomingMessage(KiB*5)
 logs.log(response, 1)
 
+
+# === Terminate Sockets === 
 passiveSocket.terminateSocket()
 controllSocket.terminateSocket()
