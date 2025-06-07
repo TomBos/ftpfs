@@ -8,7 +8,7 @@ class LogsManager:
 
     def log(self, msg, vebosityOverride = 0):
         if self.verbosity >= 1 or vebosityOverride >= 1:
-            print(f">  {msg}")
+            print(msg)
             if self.verbosity > 1 or vebosityOverride > 1:
                 self.logIntoFile(msg)
 

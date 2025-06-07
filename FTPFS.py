@@ -34,7 +34,7 @@ controlSocket.connectToHost(masterHost,masterPort)
 logs.log(f"Connected: {controlSocket.socket}")
 
 # === Initial Handshake ===
-response = controlSocket.acceptIncomingMessage(KiB * 5)
+response = controlSocket.acceptControlMessage(KiB * 5)
 logs.log(response)
 
 
@@ -45,12 +45,10 @@ logs.log(response)
 response = controlSocket.runControlCommand(f"PASS {password}", KiB*5)
 logs.log(response, 1)
 
-# === Create passive socket ===
-response = controlSocket.runPassiveCommand("LIST", logs, KiB*5)
+# === Invoke Passive Commands ===
+response = controlSocket.runPassiveCommand("LIST", logs, KiB*100)
 logs.log(response, 1)
 
-response = controlSocket.runPassiveCommand("LIST", logs, KiB*5)
-logs.log(response, 1)
 
-# === List all files in FTP configuret root dir
+# === Kill master connection 
 controlSocket.terminateSocket()

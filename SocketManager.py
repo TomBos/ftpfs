@@ -20,16 +20,26 @@ class SocketManager:
         self.checkIfSocketExists() 
         self.socket.connect((host,port))
 
-    def acceptIncomingMessage(self, bufferSize = 1024):
+    def acceptControlMessage(self, bufferSize = 1024):
         self.checkIfSocketExists()
         response = self.socket.recv(bufferSize)
         return response.decode().strip("\n")
+
+    def acceptPassiveMessage(self, bufferSize=4096):
+        self.checkIfSocketExists()
+        chunks = []
+        while True:
+            chunk = self.socket.recv(bufferSize)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        return b"".join(chunks).decode().strip("\n")
 
     def runControlCommand(self, command, bufferSize = 1024):
         self.checkIfSocketExists()
         command = (command + "\r\n").encode()
         self.socket.sendall(command)
-        return self.acceptIncomingMessage(bufferSize)
+        return self.acceptControlMessage(bufferSize)
 
     def terminateSocket(self):
         self.checkIfSocketExists()
@@ -65,11 +75,10 @@ class SocketManager:
         commandResponse = self.runControlCommand(passiveCommand, commandBufferSize)
         LogsClass.log(commandResponse)
 
-        passiveResponse = newPassiveSocket.acceptIncomingMessage(commandBufferSize)
-        
-        controlResponse = self.acceptIncomingMessage(commandBufferSize)
+        passiveResponse = newPassiveSocket.acceptPassiveMessage(commandBufferSize)
+
+        controlResponse = self.acceptControlMessage(commandBufferSize)
         LogsClass.log(controlResponse)
 
         newPassiveSocket.terminateSocket()
         return passiveResponse
-
