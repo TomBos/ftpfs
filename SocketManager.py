@@ -28,7 +28,8 @@ class SocketManager:
         self.socket.sendall(command)
         return self.acceptIncomingMessage(bufferSize)
 
-
+    def terminateSocket(self):
+        self.socket.close()
 
 
 

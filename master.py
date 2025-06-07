@@ -15,13 +15,11 @@ ftp_user = config["ftp"]["user"]
 ftp_pass = config["ftp"]["pass"]
 ftp_host = config["ftp"]["host"]
 ftp_port = config["ftp"]["port"]
+isVerbose = config["settings"]["verbosity"] or 0
 
-ftp_server = (ftp_host, ftp_port);
-
-isVerbose = 0
 if '-v' in sys.argv:
     isVerbose = 1
-    print("\nVERBOSE OUTPUT ENABLED \n")
+    print("\nVERBOSE OUTPUT ENABLED VIA ARGUMENT\n")
 
 
 def invokeCMD(socketObject, command, isVerbose = 0, bufferSize = KiB):
@@ -49,8 +47,9 @@ if isVerbose:
 response = controllSocket.runCommand(f"PASS {ftp_pass}", KiB*5)
 print(f">  {response}")
 
-cmd = f"PASV \r\n"
-response = invokeCMD(controllSocket,cmd, isVerbose)
+response = controllSocket.runCommand(f"PASV", KiB*5)
+if isVerbose:
+    print(f">  {response}")
 
 start = response.index('(')
 end = response.index(')')
@@ -65,29 +64,24 @@ if isVerbose:
 
 pasv_ip = f"{portInfo[0]}.{portInfo[1]}.{portInfo[2]}.{portInfo[3]}" 
 pasv_port =  int(portInfo[4]) * 256  + int(portInfo[5])
-pasv_ftp_server = (pasv_ip, pasv_port)
 
 print(f">  IP: {pasv_ip}:{pasv_port}")
 
-pasv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-pasv_sock.connect(pasv_ftp_server)
+
+passiveSocket = SM()
+passiveSocket.createSocket()
+passiveSocket.connectToHost(pasv_ip,pasv_port)
+
 if isVerbose:
-    print("Connected to data socket:", pasv_sock)
-    print(" ")
+    print(f"Connected to passive socket: {passiveSocket.socket} \n")
 
-cmd = f"LIST \r\n"
-response = invokeCMD(controllSocket,cmd, isVerbose)
+response = controllSocket.runCommand("LIST", KiB*5)
+if isVerbose:
+    print(response)
 
-listing = b""
-while True:
-    chunk = pasv_sock.recv(4096)
-    if not chunk:
-        break
-    listing += chunk
 
-print(listing.decode())
+response = passiveSocket.acceptIncomingMessage(KiB*5)
+print(response)
 
-pasv_sock.close()
-controllSocket.recv(KiB * 100)
-
-controllSocket.close()
+passiveSocket.terminateSocket()
+controllSocket.terminateSocket()
