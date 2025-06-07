@@ -11,10 +11,10 @@ KiB = 1024
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-ftp_user = config["ftp"]["user"]
-ftp_pass = config["ftp"]["pass"]
-ftp_host = config["ftp"]["host"]
-ftp_port = config["ftp"]["port"]
+username = config["ftp"]["user"]
+password = config["ftp"]["pass"]
+masterHost = config["ftp"]["host"]
+masterPort = config["ftp"]["port"]
 
 
 if '-v' in sys.argv:
@@ -27,56 +27,48 @@ else:
 
 
 logs = LM(verbosityLevel)
-controllSocket = SM()
-controllSocket.createSocket()
-controllSocket.connectToHost(ftp_host)
+controlSocket = SM()
+controlSocket.createSocket()
+controlSocket.connectToHost(masterHost,masterPort)
 
-logs.log(f"Connected: {controllSocket.socket}")
+logs.log(f"Connected: {controlSocket.socket}")
 
 # === Initial Handshake ===
-response = controllSocket.acceptIncomingMessage(KiB * 5)
+response = controlSocket.acceptIncomingMessage(KiB * 5)
 logs.log(response)
 
 
 # === Authenticate using credentials ===
-response = controllSocket.runCommand(f"USER {ftp_user}", KiB*5)
+response = controlSocket.runCommand(f"USER {username}", KiB*5)
 logs.log(response)
 
-response = controllSocket.runCommand(f"PASS {ftp_pass}", KiB*5)
+response = controlSocket.runCommand(f"PASS {password}", KiB*5)
 logs.log(response, 1)
 
-
-# === Get info on where to open passive mode socket ===
-response = controllSocket.runCommand(f"PASV", KiB*5)
-logs.log(response)
-
-passiveHostStart = response.index('(')+1
-passiveHostEnd = response.index(')')
-
-logs.log(f"Server PASV info found at: {passiveHostStart} - {passiveHostEnd}")
-
-parts = response[passiveHostStart:passiveHostEnd].split(',')
-logs.log(parts)
-
-passiveHostIP = ".".join(parts[:4])
-passiveHostPort = int(parts[4]) * 256 + int(parts[5])
-logs.log(f"passive connection IP: {passiveHostIP}:{passiveHostPort}", 1)
-
-
 # === Create passive socket ===
+passiveHostInfo = controlSocket.getNewPassivePort(logs, KiB*5)
+passiveHostIP = passiveHostInfo["IP"]
+passiveHostPort = passiveHostInfo["PORT"]
+
 passiveSocket = SM()
 passiveSocket.createSocket()
 passiveSocket.connectToHost(passiveHostIP,passiveHostPort)
 logs.log(f"Connected to passive socket: {passiveSocket.socket}")
 
 # === List all files in FTP configuret root dir
-response = controllSocket.runCommand("LIST", KiB*5)
+response = controlSocket.runCommand("LIST", KiB*5)
 logs.log(response)
 
 response = passiveSocket.acceptIncomingMessage(KiB*5)
 logs.log(response, 1)
+response = controlSocket.acceptIncomingMessage(KiB*5)
+logs.log(response,1)
+
+response = controlSocket.runCommand(f"STOR htdocs/stores.php", KiB * 10)
+logs.log(response,2)
+
 
 
 # === Terminate Sockets === 
 passiveSocket.terminateSocket()
-controllSocket.terminateSocket()
+controlSocket.terminateSocket()

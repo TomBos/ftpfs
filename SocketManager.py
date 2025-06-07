@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from LogsManager import LogsManager as LM
+
 import socket
 
 class SocketManager:
@@ -24,13 +26,33 @@ class SocketManager:
         return response.decode().strip("\n")
 
     def runCommand(self, command, bufferSize = 1024):
+        self.checkIfSocketExists()
         command = (command + "\r\n").encode()
         self.socket.sendall(command)
         return self.acceptIncomingMessage(bufferSize)
 
     def terminateSocket(self):
+        self.checkIfSocketExists()
         self.socket.close()
 
+    def getNewPassivePort(self, LogsClass, commandBufferSize = 1024):
+        self.checkIfSocketExists()
+        response = self.runCommand(f"PASV", commandBufferSize)
+        LogsClass.log(response)
+
+        passiveHostStart = response.index('(')+1
+        passiveHostEnd = response.index(')')
+
+        LogsClass.log(f"Server PASV info found at: {passiveHostStart} - {passiveHostEnd}")
+
+        parts = response[passiveHostStart:passiveHostEnd].split(',')
+        LogsClass.log(parts)
+
+        passiveHostIP = ".".join(parts[:4])
+        passiveHostPort = int(parts[4]) * 256 + int(parts[5])
+        LogsClass.log(f"passive connection IP: {passiveHostIP}:{passiveHostPort}", 1)
+
+        return {"IP": passiveHostIP, "PORT": passiveHostPort}
 
 
 
