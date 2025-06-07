@@ -50,23 +50,23 @@ logs.log(response, 1)
 response = controllSocket.runCommand(f"PASV", KiB*5)
 logs.log(response)
 
-start = response.index('(')
-end = response.index(')')
+passiveHostStart = response.index('(')+1
+passiveHostEnd = response.index(')')
 
-logs.log(f"Server PASV info found at: {start} - {end}")
+logs.log(f"Server PASV info found at: {passiveHostStart} - {passiveHostEnd}")
 
-portInfo = response[start+1:end].split(',')
-logs.log(portInfo)
+parts = response[passiveHostStart:passiveHostEnd].split(',')
+logs.log(parts)
 
-pasv_ip = f"{portInfo[0]}.{portInfo[1]}.{portInfo[2]}.{portInfo[3]}" 
-pasv_port =  int(portInfo[4]) * 256  + int(portInfo[5])
-logs.log(f"passive connection IP: {pasv_ip}:{pasv_port}", 1)
+passiveHostIP = ".".join(parts[:4])
+passiveHostPort = int(parts[4]) * 256 + int(parts[5])
+logs.log(f"passive connection IP: {passiveHostIP}:{passiveHostPort}", 1)
 
 
 # === Create passive socket ===
 passiveSocket = SM()
 passiveSocket.createSocket()
-passiveSocket.connectToHost(pasv_ip,pasv_port)
+passiveSocket.connectToHost(passiveHostIP,passiveHostPort)
 logs.log(f"Connected to passive socket: {passiveSocket.socket}")
 
 # === List all files in FTP configuret root dir
