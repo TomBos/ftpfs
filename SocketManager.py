@@ -25,8 +25,10 @@ class SocketManager:
         response = self.socket.recv(bufferSize)
         return response.decode().strip("\n")
 
-    def acceptPassiveMessage(self, bufferSize=4096):
+    def acceptPassiveMessage(self, bufferSize = 4096):
         self.checkIfSocketExists()
+
+        # Read away incomming buffer and return decoded data
         chunks = []
         while True:
             chunk = self.socket.recv(bufferSize)
@@ -47,9 +49,12 @@ class SocketManager:
 
     def getNewPassivePort(self, LogsClass, commandBufferSize = 1024):
         self.checkIfSocketExists()
+
+        # Try openning passive connection
         response = self.runControlCommand(f"PASV", commandBufferSize)
         LogsClass.log(response)
 
+        # Parse out Host IP + PORT
         passiveHostStart = response.index('(')+1
         passiveHostEnd = response.index(')')
 
@@ -62,23 +67,68 @@ class SocketManager:
         passiveHostPort = int(parts[4]) * 256 + int(parts[5])
         LogsClass.log(f"passive connection IP: {passiveHostIP}:{passiveHostPort}")
 
+        # Return info
         return [passiveHostIP, passiveHostPort]
     
     def runPassiveCommand(self, passiveCommand, LogsClass, commandBufferSize):
         self.checkIfSocketExists()
+
+        # Create new passive socket
         passiveHostIP, passiveHostPort = self.getNewPassivePort(LogsClass, commandBufferSize)
         newPassiveSocket = SocketManager()
         newPassiveSocket.createSocket()
         newPassiveSocket.connectToHost(passiveHostIP,passiveHostPort)
         LogsClass.log(f"Connected to passive socket: {newPassiveSocket.socket}")
 
+        # Run command
         commandResponse = self.runControlCommand(passiveCommand, commandBufferSize)
         LogsClass.log(commandResponse)
 
+        # Get response for passive socket
         passiveResponse = newPassiveSocket.acceptPassiveMessage(commandBufferSize)
 
+        # Get response for controll socket
         controlResponse = self.acceptControlMessage(commandBufferSize)
         LogsClass.log(controlResponse)
 
+        # Terminate passive socket
         newPassiveSocket.terminateSocket()
         return passiveResponse
+    
+
+    def overrideFile(self, localFilePath, remoteFilePath, LogsClass, bufferSize = 1024):
+        self.checkIfSocketExists()
+
+        # Create new passive socket
+        passiveHostIP, passiveHostPort = self.getNewPassivePort(LogsClass, 1024)
+        newPassiveSocket = SocketManager()
+        newPassiveSocket.createSocket()
+        newPassiveSocket.connectToHost(passiveHostIP,passiveHostPort)
+        LogsClass.log(f"Connected to passive socket: {newPassiveSocket.socket}")
+
+        # Ask for permission to send file
+        response = self.runControlCommand(f"STOR {remoteFilePath}", bufferSize)
+        LogsClass.log(response, 1)
+
+        # Log errors
+        if not response.startswith('150'):
+            LogsClass.log("Server did not accept STOR command, aborting upload.", 1)
+            newPassiveSocket.terminateSocket()
+            return
+
+        # Send file splitted by bufferSize
+        with open(f"{localFilePath}", "rb") as f:
+            while True:
+                chunk = f.read(bufferSize)
+                if not chunk:
+                    break
+                newPassiveSocket.socket.sendall(chunk)
+
+        # Terminate passive socket
+        newPassiveSocket.terminateSocket()
+        LogsClass.log(f"Passive socket closed after file transfer")
+
+        # Print out success message
+        finalResponse = self.acceptControlMessage(bufferSize)
+        if finalResponse.startswith('226'):
+            LogsClass.log(f"File {remoteFilePath} successfully uploaded", 1) 
