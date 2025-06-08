@@ -18,18 +18,24 @@ class fileWatcher(pyinotify.ProcessEvent):
             self.socket.overrideFile(localPath, remotePath, self.logs, self.maximumBufferSize)
         else:
             print(event.pathname)
-            # self.logs.log(f"Creating directory on remote: {remotePath}")
-            
+            self.logs.log(f"Creating directory on remote: {remotePath}")
+            response = self.socket.createDirectory(remotePath, self.maximumBufferSize) 
+            if response.startsWith('257'):
+                self.logs.log(f"Created  : {remotePath}", 1)
+            else:
+                self.logs.log(f"Failed to create {remotePath}",1)
+        
+        return
+
 
     def process_IN_MODIFY(self, event):
+        localPath = event.pathname
+        remotePath = self.getRemotePath(localPath) 
+        
         if not event.dir:
-            print(f"Modified file: {event.pathname}")
-        return 
-
-
-    def process_IN_DELETE(self, event):
-        if not event.dir:
-            print(f"Deleted file: {event.pathname}")
+            self.logs.log(f"Uploading {localPath} to {remotePath}")
+            self.socket.overrideFile(localPath, remotePath, self.logs, self.maximumBufferSize)
+        
         return
 
 

@@ -145,8 +145,6 @@ class SocketManager:
         return
 
 
-    def createDirectory(self, dirPath, LogsClass, commandBufferSize):
+    def createDirectory(self, dirPath, commandBufferSize):
         self.checkIfSocketExists()
-        response = self.runPassiveCommand(f"MKD {dirPath}", LogsClass, commandBufferSize)
-        LogsClass.log(response, 1)
-        return
+        return self.runControlCommand(f"MKD {dirPath}", commandBufferSize)
