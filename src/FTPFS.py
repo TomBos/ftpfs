@@ -2,6 +2,7 @@
 from SocketManager import SocketManager as SM
 from LogsManager import LogsManager as LM
 from ConfigManager import ConfigManager as CM
+from Watcher import fileWatcher as FW
 
 import sys
 import os
@@ -54,14 +55,11 @@ logs.log(response)
 response = controlSocket.runControlCommand(f"PASS {password}", KiB*4)
 logs.log(response, 1)
 
+# === Start Auto sync ===
+path = os.path.expanduser("~/Projects/github/FTPFS/src")
 
-# === Invoke Passive Commands ===
-response = controlSocket.runPassiveCommand("LIST htdocs/", logs, KiB*4)
-logs.log(response, 1)
-
-
-# === Try sending file ===
-controlSocket.overrideFile("2025-06-07.log", "htdocs/myfile2.txt", logs, KiB*4)
+watcher = FW(controlSocket, logs, KiB*4)
+watcher.watchDir(path)
 
 
 # === Kill master connection 

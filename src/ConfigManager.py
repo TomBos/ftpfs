@@ -48,10 +48,10 @@ class ConfigManager:
 
     def createBox(self, variable, index):
         border = "+" + "-" * (len(variable) + 2) + "+"
-        print(f"{index}:") 
+        print(f"{index}:")
         print(border)
         print(f"| {variable} |")
-        print(f"{border}\n") 
+        print(f"{border}\n")
         return
     
     def getSettings(self):
