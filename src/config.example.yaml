@@ -10,3 +10,4 @@ servers:
       remote_root: "public"
 settings:
   verbosity: 0
+
