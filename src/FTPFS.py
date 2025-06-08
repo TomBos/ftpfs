@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 from SocketManager import SocketManager as SM
 from LogsManager import LogsManager as LM
+from ConfigManager import ConfigManager as CM
 
 
-import yaml
 import sys
 
 
 KiB = 1024
 
 
-with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+configManager = CM("config.yaml")
+configManager.loadConfig()
 
+
+server_names = configManager.selectServer()
+print(server_names)
+
+sys.exit()
 
 username = config["ftp"]["user"]
 password = config["ftp"]["pass"]
