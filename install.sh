@@ -2,22 +2,20 @@
 
 set -e
 
+REPO_URL="https://github.com/TomBos/FTPFS"
 INSTALL_DIR="$HOME/.local/share/FTPFS"
 BIN_DIR="$HOME/.local/bin"
-CONFIG_DIR="$HOME/.config/FTPFS"
 WRAPPER="$BIN_DIR/FTPFS"
+TMP_DIR=$(mktemp -d)
 
-echo "[*] Installing FTPFS to $INSTALL_DIR..."
+echo "[*] Downloading FTPFS from $REPO_URL..."
+git clone --depth=1 "$REPO_URL" "$TMP_DIR"
 
+echo "[*] Installing to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR"
-cp -r ./src/* "$INSTALL_DIR"
+cp -r "$TMP_DIR/src/"* "$INSTALL_DIR"
 
-echo "[*] Copying example config to $CONFIG_DIR..."
-
-mkdir -p "$CONFIG_DIR"
-cp -r "./src/config.example.yaml" "$CONFIG_DIR/config.yaml"
-
-echo "[*] Creating wrapper script at $WRAPPER..."
+echo "[*] Creating wrapper at $WRAPPER..."
 mkdir -p "$BIN_DIR"
 
 cat > "$WRAPPER" <<EOF
@@ -26,12 +24,12 @@ python3 "$INSTALL_DIR/FTPFS.py" "\$@"
 EOF
 
 chmod +x "$WRAPPER"
+rm -rf "$TMP_DIR"
 
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     echo "[!] ~/.local/bin not in PATH"
-    echo "    Add this line to your shell profile (e.g. ~/.bashrc):"
+    echo "    Add this to your ~/.bashrc or ~/.zshrc:"
     echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
 else
-    echo "[✓] Installed successfully. You can now run: FTPFS"
+    echo "[✓] Installed! Run with: FTPFS"
 fi
-
