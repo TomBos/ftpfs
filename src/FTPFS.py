@@ -56,9 +56,14 @@ response = controlSocket.runControlCommand(f"PASS {password}", KiB*4)
 logs.log(response, 1)
 
 # === Start Auto sync ===
-path = os.path.expanduser("~/Projects/github/FTPFS/src")
+path = os.path.expanduser("~/Projects/handel/presta-eshopy")
 
-watcher = FW(controlSocket, logs, KiB*4)
+mapping = {
+    "LOCAL": "presta-eshopy",
+    "REMOTE": "htdocs"
+}
+
+watcher = FW(controlSocket, logs, mapping, KiB*4)
 watcher.watchDir(path)
 
 

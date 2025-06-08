@@ -108,7 +108,7 @@ class SocketManager:
 
         # Ask for permission to send file
         response = self.runControlCommand(f"STOR {remoteFilePath}", bufferSize)
-        LogsClass.log(response, 1)
+        LogsClass.log(response)
 
         # Log errors
         if not response.startswith('150'):
@@ -131,4 +131,4 @@ class SocketManager:
         # Print out success message
         finalResponse = self.acceptControlMessage(bufferSize)
         if finalResponse.startswith('226'):
-            LogsClass.log(f"File {remoteFilePath} successfully uploaded", 1) 
+            LogsClass.log(f"{localFilePath} => {remoteFilePath}  ", 1) 
