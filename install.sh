@@ -9,7 +9,7 @@ WRAPPER="$BIN_DIR/FTPFS"
 TMP_DIR=$(mktemp -d)
 
 echo "[*] Downloading FTPFS from $REPO_URL..."
-git clone --depth=1 "$REPO_URL" "$TMP_DIR"
+git clone --depth=1 "$REPO_URL" "$TMP_DIR" >/dev/null 2>&1
 
 echo "[*] Installing to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR"
