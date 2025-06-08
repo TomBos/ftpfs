@@ -13,9 +13,7 @@ KiB = 1024
 configManager = CM("config.yaml")
 configManager.loadConfig()
 
-
-server_names = configManager.selectServer()
-print(server_names)
+print(configManager.selectServer())
 
 sys.exit()
 

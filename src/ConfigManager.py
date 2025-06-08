@@ -24,10 +24,6 @@ class ConfigManager:
     def getServerNames(self):
         return list(self.servers.keys())
 
-    def getServerCredentials(self, serverName):
-        if serverName in self.servers:
-            return self.servers.get(serverName, {})
-
     def selectServer(self, selection = -1):
         servers = self.getServerNames() 
         
@@ -40,14 +36,14 @@ class ConfigManager:
                 self.createBox(server,index)
 
             selectedServer = input("Select server: ")
-            self.selectServer(int(selectedServer))
-            return
-
+            return self.selectServer(int(selectedServer))
         else:
             if selection > len(servers) -1 or selection < 0:
-                self.selectServer()
+                return self.selectServer()
 
-            return self.getServerCredentials(servers[selection])
+            serverName = servers[selection]
+            credentials = self.servers[serverName]
+            return credentials
 
     def createBox(self, variable, index):
         border = "+" + "-" * (len(variable) + 2) + "+"
