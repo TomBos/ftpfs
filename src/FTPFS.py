@@ -3,37 +3,31 @@ from SocketManager import SocketManager as SM
 from LogsManager import LogsManager as LM
 from ConfigManager import ConfigManager as CM
 
-
 import sys
-
-
 KiB = 1024
-
 
 configManager = CM("config.yaml")
 configManager.loadConfig()
+credentials = configManager.selectServer()
+settings = configManager.getSettings()
 
-print(configManager.selectServer())
-
-sys.exit()
-
-username = config["ftp"]["user"]
-password = config["ftp"]["pass"]
-masterHost = config["ftp"]["host"]
-masterPort = config["ftp"]["port"]
-
+username = credentials["user"]
+password = credentials["pass"]
+masterHost = credentials["host"]
+masterPort = credentials["port"]
 
 if '-v' in sys.argv:
     verbosityLevel = 2
     print("\nVERBOSE OUTPUT ENABLED VIA ARGUMENT\n")
 else:
-    verbosityLevel = config["settings"].get("verbosity")
+    verbosityLevel = settings.get("verbosity")
     if verbosityLevel is None:
         verbosityLevel = 2
 
 
 # === Create class for logs ===
 logs = LM(verbosityLevel)
+
 
 # === Create Master Socket === 
 controlSocket = SM()

@@ -20,12 +20,9 @@ class ConfigManager:
             self.servers = config["servers"]
             self.settings = config["settings"]
         return
-    
-    def getServerNames(self):
-        return list(self.servers.keys())
 
     def selectServer(self, selection = -1):
-        servers = self.getServerNames() 
+        servers = list(self.servers.keys())
         
         if selection == -1:
             if len(servers) == 1:
@@ -51,4 +48,7 @@ class ConfigManager:
         print(border)
         print(f"| {variable} |")
         print(f"{border}\n") 
-        return  
+        return
+    
+    def getSettings(self):
+        return self.settings
