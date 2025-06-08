@@ -4,9 +4,16 @@ from LogsManager import LogsManager as LM
 from ConfigManager import ConfigManager as CM
 
 import sys
+import os
+
 KiB = 1024
 
-configManager = CM("config.yaml")
+configPath = os.path.expanduser("~/.config/FTPFS/config.yaml")
+if os.path.exists(configPath):
+    configManager = CM(configPath)
+else:
+    configManager = CM("config.example.yaml")
+
 configManager.loadConfig()
 credentials = configManager.selectServer()
 settings = configManager.getSettings()

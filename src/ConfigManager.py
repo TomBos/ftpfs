@@ -20,6 +20,10 @@ class ConfigManager:
             self.servers = config["servers"]
             self.settings = config["settings"]
         return
+    
+    def getServerCredentials(self, serverName):
+        if serverName in self.servers:
+            return self.servers.get(serverName, {})
 
     def selectServer(self, selection = -1):
         servers = list(self.servers.keys())
