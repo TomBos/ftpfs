@@ -9,6 +9,7 @@ class ConfigManager:
         self.settings = None
         pass
 
+
     def loadConfig(self):
         if not os.path.exists(self.configFile):
             raise FileNotFoundError(f"Config file '{self.configFile}' not found.")
@@ -20,10 +21,12 @@ class ConfigManager:
             self.servers = config["servers"]
             self.settings = config["settings"]
         return
-    
+
+
     def getServerCredentials(self, serverName):
         if serverName in self.servers:
             return self.servers.get(serverName, {})
+        return
 
     def selectServer(self, selection = -1):
         servers = list(self.servers.keys())
@@ -45,6 +48,7 @@ class ConfigManager:
             serverName = servers[selection]
             credentials = self.servers[serverName]
             return credentials
+        return
 
     def createBox(self, variable, index):
         border = "+" + "-" * (len(variable) + 2) + "+"
@@ -53,6 +57,8 @@ class ConfigManager:
         print(f"| {variable} |")
         print(f"{border}\n")
         return
-    
+
+
     def getSettings(self):
         return self.settings
+

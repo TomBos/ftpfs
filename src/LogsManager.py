@@ -6,11 +6,13 @@ class LogsManager:
         self.verbosity = verbosity
         pass
 
+
     def log(self, msg, vebosityOverride = 0):
         if self.verbosity >= 1 or vebosityOverride >= 1:
             print(msg)
             if self.verbosity > 1 or vebosityOverride > 1:
                 self.logIntoFile(msg)
+
 
     def logIntoFile(self, msg):
         with open(f"{date.today()}.log", "a") as logFile:

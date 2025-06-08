@@ -8,22 +8,27 @@ class SocketManager:
         self.socket = None
         pass
 
+
     def createSocket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return self.socket 
 
+
     def checkIfSocketExists(self):
         if not self.socket:
             raise RuntimeError("Socket not created yet. Call createSocket() first.")
+        return
 
     def connectToHost(self, host, port = 21):
         self.checkIfSocketExists() 
         self.socket.connect((host,port))
 
+
     def acceptControlMessage(self, bufferSize = 1024):
         self.checkIfSocketExists()
         response = self.socket.recv(bufferSize)
         return response.decode().strip("\n")
+
 
     def acceptPassiveMessage(self, bufferSize = 4096):
         self.checkIfSocketExists()
@@ -37,15 +42,19 @@ class SocketManager:
             chunks.append(chunk)
         return b"".join(chunks).decode().strip("\n")
 
+
     def runControlCommand(self, command, bufferSize = 1024):
         self.checkIfSocketExists()
         command = (command + "\r\n").encode()
         self.socket.sendall(command)
         return self.acceptControlMessage(bufferSize)
 
+
     def terminateSocket(self):
         self.checkIfSocketExists()
         self.socket.close()
+        return
+
 
     def getNewPassivePort(self, LogsClass, commandBufferSize = 1024):
         self.checkIfSocketExists()
@@ -69,7 +78,8 @@ class SocketManager:
 
         # Return info
         return [passiveHostIP, passiveHostPort]
-    
+
+
     def runPassiveCommand(self, passiveCommand, LogsClass, commandBufferSize):
         self.checkIfSocketExists()
 
@@ -132,3 +142,11 @@ class SocketManager:
         finalResponse = self.acceptControlMessage(bufferSize)
         if finalResponse.startswith('226'):
             LogsClass.log(f"{localFilePath} => {remoteFilePath}  ", 1) 
+        return
+
+
+    def createDirectory(self, dirPath, LogsClass, commandBufferSize):
+        self.checkIfSocketExists()
+        response = self.runPassiveCommand(f"MKD {dirPath}", LogsClass, commandBufferSize)
+        LogsClass.log(response, 1)
+        return
