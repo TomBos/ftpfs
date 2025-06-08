@@ -1,9 +1,12 @@
 servers:
   testing:
-    user: dlpuser
-    pass: rNrKYTX9g7z3RgJRmxWuGHbeu
+    user: dlpuser                       # https://dlptest.com/ftp-test/
+    pass: rNrKYTX9g7z3RgJRmxWuGHbeu     # https://dlptest.com/ftp-test/
     host: 44.241.66.173
     port: 21
-
+    mapping:
+      watch_dir: "$HOME/Projects/github/FTPFS"
+      local_root: "src"
+      remote_root: "public"
 settings:
   verbosity: 0

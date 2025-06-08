@@ -23,6 +23,7 @@ username = credentials["user"]
 password = credentials["pass"]
 masterHost = credentials["host"]
 masterPort = credentials["port"]
+mappings = credentials["mapping"]
 
 if '-v' in sys.argv:
     verbosityLevel = 2
@@ -56,11 +57,11 @@ response = controlSocket.runControlCommand(f"PASS {password}", KiB*4)
 logs.log(response, 1)
 
 # === Start Auto sync ===
-path = os.path.expanduser("~/Projects/handel/presta-eshopy")
+path = os.path.expandvars(mappings['watch_dir'])
 
 mapping = {
-    "LOCAL": "presta-eshopy",
-    "REMOTE": "htdocs"
+    "LOCAL": mappings['local_root'],
+    "REMOTE": mappings['remote_root']
 }
 
 watcher = FW(controlSocket, logs, mapping, KiB*4)
