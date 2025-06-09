@@ -15,7 +15,7 @@ git clone --depth=1 "$REPO_URL" "$TMP_DIR" >/dev/null 2>&1
 
 echo "[*] Installing to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR"
-cp -r "$TMP_DIR/src/"* "$INSTALL_DIR"
+cp -rf "$TMP_DIR/src/"* "$INSTALL_DIR"
 
 echo "[*] Creating wrapper at $WRAPPER..."
 mkdir -p "$BIN_DIR"
@@ -23,10 +23,10 @@ mkdir -p "$BIN_DIR"
 cat > "$WRAPPER" <<EOF
 #!/bin/bash
 
-if [[ "$1" == "-u" ]]; then
+if [[ "\$1" == "-u" ]]; then
     bash <(curl -sL "https://raw.githubusercontent.com/TomBos/FTPFS/master/install.sh")
 else
-    python3 "$INSTALL_DIR/FTPFS.py" "$@"
+    python3 "$INSTALL_DIR/FTPFS.py" "\$@"
 fi
 EOF
 
