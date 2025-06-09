@@ -16,7 +16,7 @@ class fileWatcher(pyinotify.ProcessEvent):
     def process_IN_CREATE(self, event):
         localPath = event.pathname
         remotePath = self.getRemotePath(localPath)
-        isDir = even.dir
+        isDir = event.dir
 
         def createEntry():
             if not isDir:
@@ -43,7 +43,7 @@ class fileWatcher(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
         localPath = event.pathname
         remotePath = self.getRemotePath(localPath)
-        isDir = even.dir
+        isDir = event.dir
 
         def uploadFile():
             if not isDir:
