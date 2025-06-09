@@ -19,7 +19,7 @@ class fileWatcher(pyinotify.ProcessEvent):
         isDir = even.dir
 
         def createEntry():
-            if not isDir
+            if not isDir:
                 self.logs.log(f"Uploading {localPath} to {remotePath}")
                 self.socket.overrideFile(localPath, remotePath, self.logs, self.maximumBufferSize)
             else:
