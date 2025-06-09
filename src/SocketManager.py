@@ -141,7 +141,7 @@ class SocketManager:
         # Print out success message
         finalResponse = self.acceptControlMessage(bufferSize)
         if finalResponse.startswith('226'):
-            LogsClass.log(f"{localFilePath} => {remoteFilePath}  ", 1) 
+            LogsClass.log(f"Uploaded: {remoteFilePath}  ", 1) 
         return
 
 
