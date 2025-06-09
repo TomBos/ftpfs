@@ -22,7 +22,7 @@ class fileWatcher(pyinotify.ProcessEvent):
             if response.startswith('257'):
                 self.logs.log(f"Created  : {remotePath}", 1)
             else:
-                self.logs.log(f"Failed to create {remotePath}",1)
+                self.logs.log(f"Failed to create  : {remotePath}",1)
         
         return
 
