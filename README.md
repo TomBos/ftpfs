@@ -25,7 +25,8 @@ FTPFS is a no-bloat FTP client from scratch. Designed for just sending files. No
 - 🐚 Designed to run in the background  
 - 🔁 Automatically syncs files from local to remote  
 - 🧼 Lightweight and Unix-philosophy compliant  
-- 🧾 Logging and verbosity config  
+- 🧾 Logging and verbosity config
+- 🔄 Update via 1 command
 
 
 # 📦 **Installation**
@@ -35,8 +36,12 @@ You can install FTPFS using the following script:
 ```bash
 bash <(curl -sL "https://raw.githubusercontent.com/TomBos/FTPFS/master/install.sh")
 ```
+> 🔄 **To update to the latest version later, just run:**  
+> ```bash
+> FTPFS -u
+> ```
 
-### 📦 **Dependencies:**
+## 📦 **Dependencies:**
 
 - **Installation:**
   - `git`
