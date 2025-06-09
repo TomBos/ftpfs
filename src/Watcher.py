@@ -20,7 +20,7 @@ class fileWatcher(pyinotify.ProcessEvent):
             print(event.pathname)
             self.logs.log(f"Creating directory on remote: {remotePath}")
             response = self.socket.createDirectory(remotePath, self.maximumBufferSize) 
-            if response.startsWith('257'):
+            if response.startswith('257'):
                 self.logs.log(f"Created  : {remotePath}", 1)
             else:
                 self.logs.log(f"Failed to create {remotePath}",1)
