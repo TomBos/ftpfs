@@ -20,7 +20,7 @@ cp -r "$TMP_DIR/src/"* "$INSTALL_DIR"
 echo "[*] Creating wrapper at $WRAPPER..."
 mkdir -p "$BIN_DIR"
 
-cat > "$WRAPPER" <<'EOF'
+cat > "$WRAPPER" <<EOF
 #!/bin/bash
 
 if [[ " \$@ " =~ " -u " ]]; then
