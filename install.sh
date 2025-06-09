@@ -20,9 +20,14 @@ cp -r "$TMP_DIR/src/"* "$INSTALL_DIR"
 echo "[*] Creating wrapper at $WRAPPER..."
 mkdir -p "$BIN_DIR"
 
-cat > "$WRAPPER" <<EOF
+cat > "$WRAPPER" <<'EOF'
 #!/bin/bash
-python3 "$INSTALL_DIR/FTPFS.py" "\$@"
+
+if [[ " \$@ " =~ " -u " ]]; then
+    bash <(curl -sL "https://raw.githubusercontent.com/TomBos/FTPFS/master/install.sh")
+else
+    python3 "$INSTALL_DIR/FTPFS.py" "\$@"
+fi
 EOF
 
 echo "[*] Setting up config..."
