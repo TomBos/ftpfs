@@ -1,4 +1,4 @@
-# 📁 FTPFS – Minimal FTP Client
+# 📁 FTPFS – Minimal FTP Client (README work in progress 🛠️)
 
 FTPFS is a no-nonsense, no-bloat FTP client from scratch. Designed for just sending files. Nothing else.
 
@@ -44,4 +44,19 @@ You can install FTPFS using the following script:
 ```bash
 bash <(curl -sL "https://raw.githubusercontent.com/TomBos/FTPFS/master/install.sh")
 ```
+📦 Dependencies:
+- Installation:
+    - git
+    - bash
+- Runtime:
+    - python
+    - python-pyinotify
+    - python-yaml
+
+
+```bash
+# Arch installation
+    sudo pacman -S git bash python python-pyinotify python-yaml
+```
+
 
