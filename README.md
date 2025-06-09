@@ -1,4 +1,4 @@
-# 📁 FTPFS – Minimal FTP Client (README work in progress 🛠️)
+# 📁 FTPFS – Minimal FTP Client
 
 FTPFS is a no-bloat FTP client from scratch. Designed for just sending files. Nothing else.
 
