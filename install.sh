@@ -6,6 +6,8 @@ REPO_URL="https://github.com/TomBos/FTPFS"
 INSTALL_DIR="$HOME/.local/share/FTPFS"
 BIN_DIR="$HOME/.local/bin"
 WRAPPER="$BIN_DIR/FTPFS"
+CONFIG_DIR="$HOME/.config/FTPFS"
+CONFIG_FILE="$CONFIG_DIR/config.yaml"
 TMP_DIR=$(mktemp -d)
 
 echo "[*] Downloading FTPFS from $REPO_URL..."
@@ -23,8 +25,14 @@ cat > "$WRAPPER" <<EOF
 python3 "$INSTALL_DIR/FTPFS.py" "\$@"
 EOF
 
+echo "[*] Setting up config..."
+mkdir -p "$CONFIG_DIR"
+cp -n "$TMP_DIR/src/config.example.yaml" "$CONFIG_FILE"
+
 chmod +x "$WRAPPER"
 rm -rf "$TMP_DIR"
+
+echo "[i] Edit your config at: $CONFIG_FILE"
 
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     echo "[!] ~/.local/bin not in PATH"
@@ -33,3 +41,4 @@ if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
 else
     echo "[✓] Installed! Run with: FTPFS"
 fi
+
