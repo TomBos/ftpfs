@@ -1,8 +1,8 @@
 # 📁 FTPFS – Minimal FTP Client (README work in progress 🛠️)
 
-FTPFS is a no-nonsense, no-bloat FTP client from scratch. Designed for just sending files. Nothing else.
+FTPFS is a no-bloat FTP client from scratch. Designed for just sending files. Nothing else.
 
-## 🚀 Motivation
+# 🚀 Motivation
 ### Most FTP extensions suck:
 
 - ❌ Can’t send timestamps correctly  
