@@ -122,7 +122,7 @@ class SocketManager:
 
         # Log errors
         if not response.startswith('150'):
-            LogsClass.log("Server did not accept STOR command, aborting upload.", 1)
+            LogsClass.log("Server did not accept STOR command, aborting upload.")
             newPassiveSocket.terminateSocket()
             return
 
