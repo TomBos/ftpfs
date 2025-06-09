@@ -22,7 +22,7 @@ class fileWatcher(pyinotify.ProcessEvent):
         now = time.time()
         elapsed = now - lastUpload["timeStamp"]
 
-        if lastUpload["path"] == localPath and elapsed < 0.5:
+        if lastUpload["path"] == localPath and elapsed < 1:
             return
 
         lastUpload["path"] = localPath
@@ -49,7 +49,7 @@ class fileWatcher(pyinotify.ProcessEvent):
         now = time.time()
         elapsed = now - lastUpload["timeStamp"]
 
-        if lastUpload["path"] == localPath and elapsed < 0.5:
+        if lastUpload["path"] == localPath and elapsed < 1:
             return
 
         lastUpload["path"] = localPath
