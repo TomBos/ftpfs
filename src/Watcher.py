@@ -16,9 +16,10 @@ class fileWatcher(pyinotify.ProcessEvent):
     def process_IN_CREATE(self, event):
         localPath = event.pathname
         remotePath = self.getRemotePath(localPath)
+        isDir = even.dir:
 
         def createEntry():
-            if not event.dir:
+            if not isDir
                 self.logs.log(f"Uploading {localPath} to {remotePath}")
                 self.socket.overrideFile(localPath, remotePath, self.logs, self.maximumBufferSize)
             else:
@@ -41,10 +42,11 @@ class fileWatcher(pyinotify.ProcessEvent):
 
     def process_IN_MODIFY(self, event):
         localPath = event.pathname
-        remotePath = self.getRemotePath(localPath) 
+        remotePath = self.getRemotePath(localPath)
+        isDir = even.dir
 
         def uploadFile():
-            if not event.dir:
+            if not isDir:
                 self.logs.log(f"Uploading {localPath} to {remotePath}")
                 self.socket.overrideFile(localPath, remotePath, self.logs, self.maximumBufferSize)
             modifyDebounceTimers.pop(localPath, None)
