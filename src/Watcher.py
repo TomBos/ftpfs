@@ -74,6 +74,6 @@ class fileWatcher(pyinotify.ProcessEvent):
     def watchDir(self, localDir):
         wm = pyinotify.WatchManager()
         notifier = pyinotify.Notifier(wm, self)
-        wm.add_watch(localDir, pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_DELETE, rec=True)
+        wm.add_watch(localDir, pyinotify.IN_CREATE | pyinotify.IN_MODIFY, rec=True)
         notifier.loop()
         return
