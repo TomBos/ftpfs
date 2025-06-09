@@ -33,7 +33,7 @@ class fileWatcher(pyinotify.ProcessEvent):
         if localPath in createDebounceTimers:
             createDebounceTimers[localPath].cancel()
 
-        timer = threading.Timer(0.2, handle_create)
+        timer = threading.Timer(0.2, createEntry)
         createDebounceTimers[localPath] = timer
         timer.start()        
         return
