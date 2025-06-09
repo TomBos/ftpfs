@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 import pyinotify
+import time
+
+lastUpload = {
+        "path": "", 
+        "timeStamp": 0
+}
 
 class fileWatcher(pyinotify.ProcessEvent):
     def __init__(self, socket, logs, dirMapping, maxBufferSize = 1024):
@@ -11,7 +17,16 @@ class fileWatcher(pyinotify.ProcessEvent):
 
     def process_IN_CREATE(self, event):
         localPath = event.pathname
-        remotePath = self.getRemotePath(localPath) 
+        remotePath = self.getRemotePath(localPath)
+        
+        now = time.time()
+        elapsed = now - lastUpload["timeStamp"]
+
+        if lastUpload["path"] == localPath and elapsed < 0.1:
+            return
+
+        lastUpload["path"] = localPath
+        lastUpload["timeStamp"] = now
         
         if not event.dir:
             self.logs.log(f"Uploading {localPath} to {remotePath}")
@@ -29,7 +44,17 @@ class fileWatcher(pyinotify.ProcessEvent):
 
     def process_IN_MODIFY(self, event):
         localPath = event.pathname
-        remotePath = self.getRemotePath(localPath) 
+        remotePath = self.getRemotePath(localPath)
+
+        now = time.time()
+        elapsed = now - lastUpload["timeStamp"]
+
+        if lastUpload["path"] == localPath and elapsed < 0.1:
+            return
+
+        lastUpload["path"] = localPath
+        lastUpload["timeStamp"] = now
+
         
         if not event.dir:
             self.logs.log(f"Uploading {localPath} to {remotePath}")
