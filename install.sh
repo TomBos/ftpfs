@@ -23,10 +23,10 @@ mkdir -p "$BIN_DIR"
 cat > "$WRAPPER" <<EOF
 #!/bin/bash
 
-if [[ " \$@ " =~ " -u " ]]; then
+if [[ "$1" == "-u" ]]; then
     bash <(curl -sL "https://raw.githubusercontent.com/TomBos/FTPFS/master/install.sh")
 else
-    python3 "$INSTALL_DIR/FTPFS.py" "\$@"
+    python3 "$INSTALL_DIR/FTPFS.py" "$@"
 fi
 EOF
 
