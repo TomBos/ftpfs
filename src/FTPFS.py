@@ -65,7 +65,7 @@ mapping = {
 }
 
 watcher = FW(controlSocket, logs, mapping, KiB*4)
-watcher.watchDir(path)
+watcher.watchDir(path, settings.get("keep_alive"))
 
 
 # === Kill master connection 

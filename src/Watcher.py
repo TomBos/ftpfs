@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+
 import pyinotify
 import time
+import threading
 
 lastUpload = {
         "path": "", 
@@ -71,7 +73,9 @@ class fileWatcher(pyinotify.ProcessEvent):
             return remotePath
 
     
-    def watchDir(self, localDir):
+    def watchDir(self, localDir, timeOutPeriod):
+        threading.Thread(target=self.socket.sendNOOPs, args=(timeOutPeriod, self.logs), daemon=True).start()
+
         wm = pyinotify.WatchManager()
         notifier = pyinotify.Notifier(wm, self)
         wm.add_watch(localDir, pyinotify.IN_CREATE | pyinotify.IN_MODIFY, rec=True)

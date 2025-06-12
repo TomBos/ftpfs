@@ -8,6 +8,7 @@ servers:
       watch_dir: "$HOME/Projects/github/FTPFS"
       local_root: "src"
       remote_root: "public"
+
 settings:
   verbosity: 0
-
+  keep_alive: 30 # Sends NOOP command every 30s (keeps connection alive)

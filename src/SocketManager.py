@@ -2,6 +2,7 @@
 from LogsManager import LogsManager as LM
 
 import socket
+import time
 
 class SocketManager:
     def __init__(self):
@@ -145,6 +146,17 @@ class SocketManager:
         return
 
 
-    def createDirectory(self, dirPath, commandBufferSize):
+    def createDirectory(self, dirPath, commandBufferSize = 1024):
         self.checkIfSocketExists()
         return self.runControlCommand(f"MKD {dirPath}", commandBufferSize)
+
+
+    def sendNOOPs(self, timeOutPeriod, LogsClass, commandBufferSize = 1024):
+        while True:
+            try:
+                response = self.runControlCommand("NOOP", commandBufferSize)
+                LogsClass.log(response)
+                time.sleep(timeOutPeriod)          
+            except Exception as e:
+                LogsClass.log(f"NOOP failed: {e}", 1)
+                break
