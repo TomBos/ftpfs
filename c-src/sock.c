@@ -4,48 +4,54 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-void generate_timestamp(char *out, size_t size) {
+typedef struct {
+    int sockfd;
+    int max_retries;
+    char timestamp[32];
+} SocketContext;
+
+void generate_timestamp(SocketContext *pctx) {
     time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-    if (!t) return;
-    strftime(out, size, "[%d.%m.%Y %H:%M:%S]", t);
+    struct tm *pt = localtime(&now);
+    if (!pt) return;
+    strftime(pctx->timestamp, sizeof(pctx->timestamp), "[%d.%m.%Y %H:%M:%S]", pt);
 }
 
 int socket_valid(int sockfd) {
     // 0 stdin, 1 stdout, 2 stderr
     // these are common unix file descriptors
     // they may be used but they probably wont be
-    return sockfd >= 0;
+	return sockfd >= 0;
 }
 
-int create_tcp_socket(int max_tries) {
-    char time_stamp[32];
-    int sockfd;
+int create_tcp_socket(SocketContext *pctx) {
+    while (pctx->max_retries--) {
+        pctx->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        generate_timestamp(pctx);
 
-    while (max_tries--) {
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        generate_timestamp(time_stamp, sizeof(time_stamp));
-
-        if (socket_valid(sockfd)) {
-            printf("%s Socket created, socketfd->%d\n", time_stamp, sockfd);
-            return sockfd;
+        if (socket_valid(pctx->sockfd)) {
+            printf("%s Socket created, socketfd->%d\n", pctx->timestamp, pctx->sockfd);
+            return 0;
         }
 
-        printf("%s Invalid socketfd->%d\n", time_stamp, sockfd);
+        printf("%s Invalid socketfd->%d\n", pctx->timestamp, pctx->sockfd);
     }
 
     return -1;
 }
 
 int main() {
-    int sockfd = create_tcp_socket(3);
-    if (sockfd < 0) {
+    SocketContext ctx = {
+        .sockfd = -1,
+        .max_retries = 3
+    };
+
+    if (create_tcp_socket(&ctx) < 0) {
         fprintf(stderr, "Failed to create socket after retries\n");
         return 1;
     }
 
-
-    close(sockfd);
+    close(ctx.sockfd);
     return 0;
 }
 
