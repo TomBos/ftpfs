@@ -194,5 +194,8 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# C binary files
+.bin
+
 # FTP config files
 config.yaml
