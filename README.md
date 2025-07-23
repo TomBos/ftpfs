@@ -1,3 +1,5 @@
+# I am working on C version with much more features, as of now this python version is not very stable
+
 # 📁 FTPFS – Minimal FTP Client
 
 FTPFS is a no-bloat FTP client from scratch. Designed for just sending files. Nothing else.
@@ -15,7 +17,7 @@ FTPFS is a no-bloat FTP client from scratch. Designed for just sending files. No
 - 🔄 Sync files automatically to remote
 - 🧾 A config file to control behavior
 - 📦 Installation that doesn’t make me cry
-- 📥 (If I ever want to download files? I’ll use FileZilla.)
+- 📥 (If I ever want to download files, I’ll use FileZilla.)
 
 ✅ **Features** (as of 09.06.2025)
 
