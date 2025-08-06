@@ -5,6 +5,8 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 
+#define BUFFER_SIZE 1024
+
 #include "validate.h"
 
 // Fill in current timestamp into the context (e.g. "[28.07.2025 19:21:52]")

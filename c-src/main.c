@@ -6,32 +6,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#define BUFFER_SIZE 1024
-
 #include "structs.h"
 #include "sock_utils.h"
-
-
-int recv_buff(SocketContext *pctx) {
-	char buffer[BUFFER_SIZE];
-	ssize_t bytes_received;
-
-	// get data from socket
-	bytes_received = recv(pctx->sockfd, buffer, BUFFER_SIZE - 1, 0);
-	if (bytes_received < 0) {
-		generate_timestamp(pctx);
-		fprintf(stderr, "%s recv failed !",pctx->timestamp);
-		return 0;
-	}
-
-	buffer[bytes_received] = '\0';
-	generate_timestamp(pctx);
-	fprintf(stdout, "%s MSG: %s", pctx->timestamp, buffer);
-	return 1;
-}
-
-
-
 
 int main(int argc, char *argv[]) {
 	if (argc < 3) {
@@ -77,7 +53,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	snprintf(message, BUFFER_SIZE, "PASS %s\r\n", argv[4]);
-	send_buff(&ctx, message);
 
 	if (!send_buff(&ctx, message)) {
 		fprintf(stdout, "Failed to read send message\n");
