@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <time.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -12,15 +10,6 @@
 #include "sock_utils.h"
 
 #define BUFFER_SIZE 1024
-
-// Fill in current timestamp into the context (e.g. "[28.07.2025 19:21:52]")
-void generate_timestamp(SocketContext *pctx) {
-    time_t now = time(NULL);                      // get current time (seconds since epoch)
-    struct tm *pt = localtime(&now);              // convert to local time (broken-down)
-    if (!pt) return;
-    strftime(pctx->timestamp, sizeof(pctx->timestamp), "[%d.%m.%Y %H:%M:%S]", pt);  // format it
-}
-
 
 // Connect to given host:port and log result
 int connect_to_host(SocketContext *pctx, const char *host, int port) {
@@ -36,7 +25,7 @@ int connect_to_host(SocketContext *pctx, const char *host, int port) {
     int err = getaddrinfo(host, port_str, &hints, &pres);  // resolve host and port
     if (err != 0) {
         generate_timestamp(pctx);
-        printf("%s getaddrinfo: %s\n", pctx->timestamp, gai_strerror(err));
+        fprintf(stdout, "%s getaddrinfo: %s\n", pctx->timestamp, gai_strerror(err));
         return -1;
     }
 
@@ -52,12 +41,12 @@ int connect_to_host(SocketContext *pctx, const char *host, int port) {
 
     if (!connected) {
 		generate_timestamp(pctx);
-		printf("%s Connecting to %s:%d failed\n", pctx->timestamp, host, port);
+		fprintf(stdout, "%s Connecting to %s:%d failed\n", pctx->timestamp, host, port);
 		return -1;
     }
 
     generate_timestamp(pctx);
-    printf("%s Connected to %s:%d\n", pctx->timestamp, host, port);
+    fprintf(stdout, "%s Connected to %s:%d\n", pctx->timestamp, host, port);
     return 0;
 }
 
@@ -76,7 +65,7 @@ int recv_msg(SocketContext *pctx) {
 
 	buffer[bytes_received] = '\0';
 	generate_timestamp(pctx);
-	printf("%s MSG: %s", pctx->timestamp, buffer);
+	fprintf(stdout, "%s MSG: %s", pctx->timestamp, buffer);
 	return 0;
 }
 
@@ -85,7 +74,7 @@ int send_msg(SocketContext *pctx, const char *buffer) {
 	// buffer exists	
 	if (buffer	== NULL) {
 		generate_timestamp(pctx);
-		fprintf(stderr, "%s Null Buffer Provided !",pctx->timestamp);
+		fprintf(stdout, "%s Null Buffer Provided !",pctx->timestamp);
 		return 1;
 	}
 
@@ -93,7 +82,7 @@ int send_msg(SocketContext *pctx, const char *buffer) {
 	size_t num_of_bytes = strnlen(buffer, BUFFER_SIZE);
 	if (strlen(buffer) > BUFFER_SIZE) {
 		generate_timestamp(pctx);
-		fprintf(stderr, "%s buffer exceeds system allowed buffer size !",pctx->timestamp);
+		fprintf(stdout, "%s buffer exceeds system allowed buffer size !",pctx->timestamp);
 		return 1;
 	}
 
@@ -101,7 +90,7 @@ int send_msg(SocketContext *pctx, const char *buffer) {
 	ssize_t res = send(pctx->sockfd, buffer, num_of_bytes, 0);
 	if (res < 0) {
 		generate_timestamp(pctx);
-		fprintf(stderr, "%s Failed to send data: %s\n", pctx->timestamp, strerror(errno));
+		fprintf(stdout, "%s Failed to send data: %s\n", pctx->timestamp, strerror(errno));
 		return 1;
 	}
 
@@ -111,7 +100,7 @@ int send_msg(SocketContext *pctx, const char *buffer) {
 
 int main(int argc, char *argv[]) {
 	if (argc < 3) {
-        fprintf(stderr, "Usage: %s <server> <port>\n", argv[0]);
+        fprintf(stdout, "Usage: %s <server> <port>\n", argv[0]);
         return 1;
     }
 
@@ -121,7 +110,7 @@ int main(int argc, char *argv[]) {
     };
 
 	if (create_tcp_socket(&ctx) != 0) {
-        fprintf(stderr, "Failed to create socket after retries\n");
+        fprintf(stdout, "Failed to create socket after retries\n");
         return 1;
     }
 	
@@ -130,12 +119,12 @@ int main(int argc, char *argv[]) {
 	int port = atoi(port_str);
 
 	if (connect_to_host(&ctx, server, port) != 0) {
-		fprintf(stderr, "Failed to connect to host\n");
+		fprintf(stdout, "Failed to connect to host\n");
 		return 1;
 	}
 
 	if (recv_msg(&ctx) != 0) {
-		fprintf(stderr, "Failed to read handshake\n");
+		fprintf(stdout, "Failed to read handshake\n");
 		return 1;
 	}
 
@@ -143,12 +132,12 @@ int main(int argc, char *argv[]) {
 	snprintf(message, BUFFER_SIZE, "USER %s\r\n", argv[3]);
 	
 	if (send_msg(&ctx, message) != 0) {
-		fprintf(stderr, "Failed to read send message\n");
+		fprintf(stdout, "Failed to read send message\n");
 		return 1;
 	}
 
 	if (recv_msg(&ctx) != 0) {
-		fprintf(stderr, "Failed to read handshake\n");
+		fprintf(stdout, "Failed to read handshake\n");
 		return 1;
 	}
 
@@ -156,12 +145,12 @@ int main(int argc, char *argv[]) {
 	send_msg(&ctx, message);
 
 	if (send_msg(&ctx, message) != 0) {
-		fprintf(stderr, "Failed to read send message\n");
+		fprintf(stdout, "Failed to read send message\n");
 		return 1;
 	}
 
 	if (recv_msg(&ctx) != 0) {
-		fprintf(stderr, "Failed to read handshake\n");
+		fprintf(stdout, "Failed to read handshake\n");
 		return 1;
 	}
 

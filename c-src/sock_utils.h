@@ -1,6 +1,9 @@
 #ifndef SOCK_UTILS_H
 #define SOCK_UTILS_H
 
+#include <time.h>
+#include <sys/socket.h>
+
 // Fill in current timestamp into the context (e.g. "[28.07.2025 19:21:52]")
 void generate_timestamp(SocketContext *pctx) {
 	// get current time (seconds since epoch)	
@@ -39,11 +42,11 @@ int create_tcp_socket(SocketContext *pctx) {
 		
 		// check if the file descriptor is valid
 		if (is_valid_socket(pctx->sockfd)) {
-			printf("%s Socket created, socketfd->%d\n", pctx->timestamp, pctx->sockfd);
+			fprintf(stdout, "%s Socket created, socketfd->%d\n", pctx->timestamp, pctx->sockfd);
 			return 0;
 		}
 
-		printf("%s Invalid socketfd->%d\n", pctx->timestamp, pctx->sockfd);
+		fprintf(stdout, "%s Invalid socketfd->%d\n", pctx->timestamp, pctx->sockfd);
 	}
 
 	// fail if all retries exhausted
