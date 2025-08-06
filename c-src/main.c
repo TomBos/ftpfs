@@ -22,24 +22,6 @@ void generate_timestamp(SocketContext *pctx) {
 }
 
 
-// Create a TCP socket, retrying if needed
-int create_tcp_socket(SocketContext *pctx) {
-    while (pctx->max_retries--) {
-        pctx->sockfd = socket(AF_INET, SOCK_STREAM, 0);  // create IPv4 TCP socket
-        generate_timestamp(pctx);
-
-        if (is_valid_socket(pctx->sockfd)) {
-            printf("%s Socket created, socketfd->%d\n", pctx->timestamp, pctx->sockfd);
-            return 0;
-        }
-
-        printf("%s Invalid socketfd->%d\n", pctx->timestamp, pctx->sockfd);
-    }
-
-    return -1;  // fail if all retries exhausted
-}
-
-
 // Connect to given host:port and log result
 int connect_to_host(SocketContext *pctx, const char *host, int port) {
     struct addrinfo hints, *pres, *prp;
