@@ -8,15 +8,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "structs.h"
+#include "sock_utils.h"
+
 #define BUFFER_SIZE 1024
-
-// Holds socket info and metadata
-typedef struct {
-    int sockfd;             // file descriptor for the socket
-    int max_retries;        // how many times to retry socket creation
-    char timestamp[32];     // human-readable timestamp
-} SocketContext;
-
 
 // Fill in current timestamp into the context (e.g. "[28.07.2025 19:21:52]")
 void generate_timestamp(SocketContext *pctx) {
@@ -27,21 +22,13 @@ void generate_timestamp(SocketContext *pctx) {
 }
 
 
-// Check if the file descriptor is valid (>= 0)
-int socket_valid(int sockfd) {
-	// stdin = 0, stdout = 1, stderr = 2 — those are usually taken,
-	// but technically still valid fds
-	return sockfd >= 0;
-}
-
-
 // Create a TCP socket, retrying if needed
 int create_tcp_socket(SocketContext *pctx) {
     while (pctx->max_retries--) {
         pctx->sockfd = socket(AF_INET, SOCK_STREAM, 0);  // create IPv4 TCP socket
         generate_timestamp(pctx);
 
-        if (socket_valid(pctx->sockfd)) {
+        if (is_valid_socket(pctx->sockfd)) {
             printf("%s Socket created, socketfd->%d\n", pctx->timestamp, pctx->sockfd);
             return 0;
         }
@@ -92,6 +79,7 @@ int connect_to_host(SocketContext *pctx, const char *host, int port) {
     return 0;
 }
 
+
 int recv_msg(SocketContext *pctx) {
 	char buffer[BUFFER_SIZE];
 	ssize_t bytes_received;
@@ -106,7 +94,35 @@ int recv_msg(SocketContext *pctx) {
 
 	buffer[bytes_received] = '\0';
 	generate_timestamp(pctx);
-	printf("%s MSG: %s\n", pctx->timestamp, buffer);
+	printf("%s MSG: %s", pctx->timestamp, buffer);
+	return 0;
+}
+
+
+int send_msg(SocketContext *pctx, const char *buffer) {
+	// buffer exists	
+	if (buffer	== NULL) {
+		generate_timestamp(pctx);
+		fprintf(stderr, "%s Null Buffer Provided !",pctx->timestamp);
+		return 1;
+	}
+
+	// buffer is valid size
+	size_t num_of_bytes = strnlen(buffer, BUFFER_SIZE);
+	if (strlen(buffer) > BUFFER_SIZE) {
+		generate_timestamp(pctx);
+		fprintf(stderr, "%s buffer exceeds system allowed buffer size !",pctx->timestamp);
+		return 1;
+	}
+
+	// send buffer
+	ssize_t res = send(pctx->sockfd, buffer, num_of_bytes, 0);
+	if (res < 0) {
+		generate_timestamp(pctx);
+		fprintf(stderr, "%s Failed to send data: %s\n", pctx->timestamp, strerror(errno));
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -136,7 +152,36 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	recv_msg(&ctx);
+	if (recv_msg(&ctx) != 0) {
+		fprintf(stderr, "Failed to read handshake\n");
+		return 1;
+	}
+
+	char message[BUFFER_SIZE];
+	snprintf(message, BUFFER_SIZE, "USER %s\r\n", argv[3]);
+	
+	if (send_msg(&ctx, message) != 0) {
+		fprintf(stderr, "Failed to read send message\n");
+		return 1;
+	}
+
+	if (recv_msg(&ctx) != 0) {
+		fprintf(stderr, "Failed to read handshake\n");
+		return 1;
+	}
+
+	snprintf(message, BUFFER_SIZE, "PASS %s\r\n", argv[4]);
+	send_msg(&ctx, message);
+
+	if (send_msg(&ctx, message) != 0) {
+		fprintf(stderr, "Failed to read send message\n");
+		return 1;
+	}
+
+	if (recv_msg(&ctx) != 0) {
+		fprintf(stderr, "Failed to read handshake\n");
+		return 1;
+	}
 
     close(ctx.sockfd);
     return 0;
