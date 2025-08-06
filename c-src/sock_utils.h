@@ -51,7 +51,7 @@ int create_tcp_socket(SocketContext *pctx) {
 	}
 
 	// fail if all retries exhausted
-	return -1;
+	return 0;
 }
 
 // Connect to given host:port and log result
@@ -76,7 +76,7 @@ int connect_to_host(SocketContext *pctx, const char *host, int port) {
 	if (err != 0) {
 		generate_timestamp(pctx);
 		fprintf(stdout, "%s getaddrinfo: %s\n", pctx->timestamp, gai_strerror(err));
-		return -1;
+		return 0;
 	}
 
 	// attempt to iterate trough the list of resolved addresses
@@ -92,16 +92,67 @@ int connect_to_host(SocketContext *pctx, const char *host, int port) {
 	// free linked list of results
 	freeaddrinfo(pres);
 
+	// fail if buffer isnt connected
 	if (!connected) {
 		generate_timestamp(pctx);
 		fprintf(stdout, "%s Connecting to %s:%d failed\n", pctx->timestamp, host, port);
-		return -1;
+		return 0;
 	}
 
 	generate_timestamp(pctx);
 	fprintf(stdout, "%s Connected to %s:%d\n", pctx->timestamp, host, port);
 	return 1;
 }
+
+
+// TODO: Add support returning data
+// send buffer data via connected socket
+int send_buff(SocketContext *pctx, const char *buffer) {
+	// validate buffer data, if the buffer isnt valid fail
+	// TODO: Allow buffers that are divisible by BUFFER_SIZE ??
+	if (!is_valid_buffer(buffer)) {
+		generate_timestamp(pctx);
+		fprintf(stdout, "%s Invalid buffer provided !", pctx->timestamp);
+		return 0;
+	}
+
+	// calculate size of buffer
+	size_t num_of_bytes = strlen(buffer);
+
+	// attempt to send buffer
+	ssize_t res = send(pctx->sockfd, buffer, num_of_bytes, 0);
+	if (res < 0) {
+		generate_timestamp(pctx);
+		fprintf(stdout, "%s Failed to send data: %s\n", pctx->timestamp, strerror(errno));
+		return 0;
+	}
+
+	return 1;
+}
+
+// TODO: Add support returning data
+// process incoming buffer
+int recv_buff(SocketContext *pctx) {
+	char buffer[BUFFER_SIZE];
+	ssize_t bytes_received;
+
+	// get data from socket
+	// allow up to BUFFER_SIZE-1 for terminator
+	bytes_received = recv(pctx->sockfd, buffer, BUFFER_SIZE - 1, 0);
+	if (bytes_received < 0) {
+		generate_timestamp(pctx);
+		fprintf(stdout, "%s recv failed !",pctx->timestamp);
+		return 0;
+	}
+
+	// append terminator to end of buffer
+	// print buffer
+	buffer[bytes_received] = '\0';
+	generate_timestamp(pctx);
+	fprintf(stdout, "%s MSG: %s", pctx->timestamp, buffer);
+	return 1;
+}
+
 
 #endif
 

@@ -12,7 +12,7 @@
 #include "sock_utils.h"
 
 
-int recv_msg(SocketContext *pctx) {
+int recv_buff(SocketContext *pctx) {
 	char buffer[BUFFER_SIZE];
 	ssize_t bytes_received;
 
@@ -31,26 +31,6 @@ int recv_msg(SocketContext *pctx) {
 }
 
 
-int send_msg(SocketContext *pctx, const char *buffer) {
-	if (!is_valid_buffer(buffer)) {
-		generate_timestamp(pctx);
-		fprintf(stdout, "%s Invalid buffer provided !", pctx->timestamp);
-		return 0;
-	}
-
-	// calculate size of buffer
-	size_t num_of_bytes = strlen(buffer); 
-
-	// send buffer
-	ssize_t res = send(pctx->sockfd, buffer, num_of_bytes, 0);
-	if (res < 0) {
-		generate_timestamp(pctx);
-		fprintf(stdout, "%s Failed to send data: %s\n", pctx->timestamp, strerror(errno));
-		return 0;
-	}
-
-	return 1;
-}
 
 
 int main(int argc, char *argv[]) {
@@ -78,7 +58,7 @@ int main(int argc, char *argv[]) {
 		return 3;
 	}
 
-	if (!recv_msg(&ctx)) {
+	if (!recv_buff(&ctx)) {
 		fprintf(stdout, "Failed to read handshake\n");
 		return 4;
 	}
@@ -86,25 +66,25 @@ int main(int argc, char *argv[]) {
 	char message[BUFFER_SIZE];
 	snprintf(message, BUFFER_SIZE, "USER %s\r\n", argv[3]);
 	
-	if (!send_msg(&ctx, message)) {
+	if (!send_buff(&ctx, message)) {
 		fprintf(stdout, "Failed to read send message\n");
 		return 5;
 	}
 
-	if (!recv_msg(&ctx)) {
+	if (!recv_buff(&ctx)) {
 		fprintf(stdout, "Failed to read handshake\n");
 		return 6;
 	}
 
 	snprintf(message, BUFFER_SIZE, "PASS %s\r\n", argv[4]);
-	send_msg(&ctx, message);
+	send_buff(&ctx, message);
 
-	if (!send_msg(&ctx, message)) {
+	if (!send_buff(&ctx, message)) {
 		fprintf(stdout, "Failed to read send message\n");
 		return 7;
 	}
 
-	if (!recv_msg(&ctx)) {
+	if (!recv_buff(&ctx)) {
 		fprintf(stdout, "Failed to read handshake\n");
 		return 8;
 	}
