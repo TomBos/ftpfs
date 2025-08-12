@@ -107,7 +107,6 @@ int connect_to_host(SocketContext *pctx, const char *host, int port) {
 }
 
 
-// TODO: Add support returning data
 // send buffer data via connected socket
 int send_buff(SocketContext *pctx, const char *buffer) {
 	// validate buffer data, if the buffer isnt valid fail
@@ -134,25 +133,31 @@ int send_buff(SocketContext *pctx, const char *buffer) {
 
 // TODO: Add support returning data
 // process incoming buffer
-int recv_buff(SocketContext *pctx) {
-	char buffer[BUFFER_SIZE];
-	ssize_t bytes_received;
+ssize_t recv_buff(SocketContext *pctx, char *pout_buffer, size_t buffer_size) {
+	if (buffer_size <= 0) {
+		// buffer is too small, to recieve any data	
+		return -1;
+	}
+
+	int bytes_received = 0; 
 
 	// get data from socket
 	// allow up to BUFFER_SIZE-1 for terminator
-	bytes_received = recv(pctx->sockfd, buffer, BUFFER_SIZE - 1, 0);
+	bytes_received = recv(pctx->sockfd, pout_buffer, buffer_size - 1, 0);
 	if (bytes_received < 0) {
 		generate_timestamp(pctx);
 		fprintf(stdout, "%s recv failed !",pctx->timestamp);
-		return 0;
+		return -1;
 	}
 
 	// append terminator to end of buffer
 	// print buffer
-	buffer[bytes_received] = '\0';
+	pout_buffer[bytes_received] = '\0';
 	generate_timestamp(pctx);
-	fprintf(stdout, "%s MSG: %s", pctx->timestamp, buffer);
-	return 1;
+	fprintf(stdout, "%s MSG: %s", pctx->timestamp, pout_buffer);
+
+	// return the size of received buffer
+	return bytes_received;
 }
 
 
