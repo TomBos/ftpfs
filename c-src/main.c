@@ -9,15 +9,15 @@
 #include "structs.h"
 #include "sock_utils.h"
 
-#define ARUGMENT_ERROR 1
-#define SOCK_CREATION_ERROR 2
-#define HOST_CONNECTION_ERROR 3
-#define HAND_SHAKE_ERROR 4
+#define ERR_INVALID_ARUGMENT 	1
+#define ERR_SOCK_CREATION 		2
+#define ERR_HOST_CONNECTION 	3
+#define ERR_HAND_SHAKE			4
 
 int main(int argc, char *argv[]) {
 	if (argc < 3) {
         fprintf(stdout, "Usage: %s <server> <port>\n", argv[0]);
-        return ARGUMENT_ERROR;
+        return ERR_INVALID_ARUGMENT;
     }
 
 	SocketContext ctx = {
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	// create master socket
 	if (!create_tcp_socket(&ctx)) {
         fprintf(stdout, "Failed to create socket after retries\n");
-        return SOCK_CREATION_ERROR;
+        return ERR_SOCK_CREATION;
     }
 
 	// get server and port
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 
 	if (!connect_to_host(&ctx, server, port)) {
 		fprintf(stdout, "Failed to connect to host\n");
-		return HOST_CONNECTION_ERROR;
+		return ERR_HOST_CONNECTION;
 	}
 
 	// create arrays to store messages
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	// Read initial response
 	if (!recv_buff(&ctx, recv_msg, BUFFER_SIZE)) {
 		fprintf(stdout, "Failed to read handshake\n");
-		return HAND_SHAKE_ERROR;
+		return ERR_HAND_SHAKE;
 	}
 
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 	}
 	if (!recv_buff(&ctx, recv_msg, BUFFER_SIZE)) {
 		fprintf(stdout, "Failed to read handshake\n");
-		return HAND_SHAKE_ERROR;
+		return ERR_HAND_SHAKE;
 	}
 
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	}
 	if (!recv_buff(&ctx, recv_msg, BUFFER_SIZE)) {
 		fprintf(stdout, "Failed to read handshake\n");
-		return HAND_SHAKE_ERROR;
+		return ERR_HAND_SHAKE;
 	}
 
 	
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 	}
 	if (!recv_buff(&ctx, recv_msg, BUFFER_SIZE)) {
 		fprintf(stdout, "Failed to read handshake\n");
-		return HAND_SHAKE_ERROR;
+		return ERR_HAND_SHAKE;
 	}
 	
 	fprintf(stdout, "%s", recv_msg);
@@ -109,14 +109,14 @@ int main(int argc, char *argv[]) {
 
 	if (!create_tcp_socket(&ptx)) {
 		fprintf(stdout, "Failed to create TPC socket\n");
-		return SOCK_CREATION_ERROR;
+		return ERR_SOCK_CREATION;
 	}
 
 	char pasv_host[16];
 	snprintf(pasv_host, 16, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
 	if (!connect_to_host(&ptx, pasv_host, pasv_port)) {
 		fprintf(stdout, "Failed to connect to host\n");
-		return HOST_CONNECTION_ERROR;
+		return ERR_HOST_CONNECTION;
 	}
 
 
