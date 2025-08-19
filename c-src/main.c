@@ -86,8 +86,11 @@ int main(int argc, char *argv[]) {
 		fprintf(stdout, "Failed to read handshake\n");
 		return ERR_HAND_SHAKE;
 	}
+
+	// create timestamp and log res
+	generate_timestamp(&ctx);
+	fprintf(stdout, "%s %s", ctx.timestamp, recv_msg);
 	
-	fprintf(stdout, "%s", recv_msg);
 	int ip1, ip2, ip3, ip4, p1, p2;
 	int pasv_port;
 
@@ -95,8 +98,11 @@ int main(int argc, char *argv[]) {
     // Skip initial digits (227), then everything until first number and then read 6 numbers separated by commas and optional spaces
     if (sscanf(recv_msg, "%*d%*[^0-9]%d , %d , %d , %d , %d , %d",
                &ip1, &ip2, &ip3, &ip4, &p1, &p2) == 6) {
-		pasv_port = p1 * 256 + p2;	
-		printf("Adress: %d.%d.%d.%d:%d\n", ip1, ip2, ip3, ip4, pasv_port);
+		pasv_port = p1 * 256 + p2;
+	
+		// log res
+		generate_timestamp(&ctx);
+		fprintf(stdout, "%s Adress: %d.%d.%d.%d:%d\n", ctx.timestamp, ip1, ip2, ip3, ip4, pasv_port);
     } else {
         fprintf(stderr, "Failed to parse numbers\n");
         return 11;

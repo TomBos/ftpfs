@@ -24,7 +24,7 @@ void generate_timestamp(SocketContext *pctx) {
 	strftime(base, sizeof(base), "[%d.%m.%Y %H:%M:%S", pt);
 
 	// append milliseconds
-	snprintf(pctx->timestamp, sizeof(pctx->timestamp), "%s.%03ld]", base, tv.tv_usec / 1000);
+	snprintf(pctx->timestamp, sizeof(pctx->timestamp), "%s.%04ld]", base, tv.tv_usec / 100);
 }
 
 // Create a TCP socket, retrying if needed
@@ -153,8 +153,6 @@ ssize_t recv_buff(SocketContext *pctx, char *pout_buffer, size_t buffer_size) {
 	// append terminator to end of buffer
 	// print buffer
 	pout_buffer[bytes_received] = '\0';
-	generate_timestamp(pctx);
-	fprintf(stdout, "%s MSG: %s", pctx->timestamp, pout_buffer);
 
 	// return the size of received buffer
 	return bytes_received;
